@@ -53,6 +53,37 @@ function init() {
     });
 
     loadTodos();
+
+    // Apply saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('themeToggle').textContent = 'Light';
+    }
+    document.getElementById('exportBtn').addEventListener('click', exportTodos);
+    document.getElementById('importBtn').addEventListener('click', () => {
+        document.getElementById('importFile').click();
+    });
+    document.getElementById('importFile').addEventListener('change', (e) => {
+        if (e.target.files[0]) {
+            importTodos(e.target.files[0]);
+            e.target.value = ''; // reset so same file can be re-imported
+        }
+    });
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+            document.getElementById('themeToggle').textContent = 'Dark';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            document.getElementById('themeToggle').textContent = 'Light';
+        }
+    });
+
     renderTodos();
 }
 
@@ -109,6 +140,40 @@ function renderTodos() {
         const li = document.createElement('li');
         li.className = 'todo-item';
         if (todo.completed) li.classList.add('completed');
+
+        li.dataset.id = todo.id;
+        li.draggable = !sortByDueDateActive;
+
+        if (!sortByDueDateActive) {
+            li.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', String(todo.id));
+                li.classList.add('dragging');
+            });
+            li.addEventListener('dragend', () => {
+                li.classList.remove('dragging');
+            });
+            li.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                li.classList.add('drag-over');
+            });
+            li.addEventListener('dragleave', () => {
+                li.classList.remove('drag-over');
+            });
+            li.addEventListener('drop', (e) => {
+                e.preventDefault();
+                li.classList.remove('drag-over');
+                const draggedId = Number(e.dataTransfer.getData('text/plain'));
+                const targetId = todo.id;
+                if (draggedId === targetId) return;
+                const fromIndex = todos.findIndex(t => t.id === draggedId);
+                const toIndex = todos.findIndex(t => t.id === targetId);
+                // Reorder in-place
+                const [moved] = todos.splice(fromIndex, 1);
+                todos.splice(toIndex, 0, moved);
+                saveTodos();
+                renderTodos();
+            });
+        }
 
         li.innerHTML = `
             <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
@@ -187,4 +252,36 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Feature 4: Export todos to JSON file
+function exportTodos() {
+    const blob = new Blob([JSON.stringify(todos, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'todos.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Feature 4: Import todos from JSON file
+function importTodos(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!Array.isArray(data) || !data.every(t => 'id' in t && 'text' in t && 'completed' in t)) {
+                alert('Invalid todos file format.');
+                return;
+            }
+            todos = data;
+            nextId = todos.length > 0 ? Math.max(...todos.map(t => t.id)) + 1 : 1;
+            saveTodos();
+            renderTodos();
+        } catch {
+            alert('Failed to parse JSON file.');
+        }
+    };
+    reader.readAsText(file);
 }

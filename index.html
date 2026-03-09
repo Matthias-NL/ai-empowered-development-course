@@ -9,6 +9,7 @@
 <body>
     <header>
         <h1>My App</h1>
+        <button id="themeToggle">Dark</button>
     </header>
 
     <main>
@@ -25,6 +26,12 @@
                 <button class="filter-btn" data-filter="active">Active</button>
                 <button class="filter-btn" data-filter="completed">Completed</button>
                 <button id="sortByDueDate" class="sort-btn">Sort by Due Date</button>
+            </div>
+
+            <div class="io-section">
+                <button id="exportBtn">Export JSON</button>
+                <button id="importBtn">Import JSON</button>
+                <input type="file" id="importFile" accept=".json" style="display:none">
             </div>
 
             <ul class="todoList" id="todoList"></ul>

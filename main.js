@@ -1,8 +1,25 @@
 import { VibeKanbanWebCompanion } from 'vibe-kanban-web-companion';
+import { format, parseISO, isValid, isPast, isToday, isTomorrow } from "date-fns";
 
 // Todos array (Feature 1)
 let todos = [];
 let nextId = 1;
+
+// Feature 3: Sort by due date
+let sortByDueDateActive = false;
+
+function saveTodos() {
+    localStorage.setItem('todos', JSON.stringify(todos));
+    localStorage.setItem('nextId', String(nextId));
+}
+
+function loadTodos() {
+    const stored = localStorage.getItem('todos');
+    if (stored) {
+        todos = JSON.parse(stored);
+        nextId = Number(localStorage.getItem('nextId')) || todos.length + 1;
+    }
+}
 
 // Current filter (Feature 2)
 let currentFilter = 'all';
@@ -28,6 +45,14 @@ function init() {
         btn.addEventListener('click', () => setFilter(btn.dataset.filter));
     });
 
+    // Wire up sort button
+    document.getElementById('sortByDueDate').addEventListener('click', () => {
+        sortByDueDateActive = !sortByDueDateActive;
+        document.getElementById('sortByDueDate').classList.toggle('active', sortByDueDateActive);
+        renderTodos();
+    });
+
+    loadTodos();
     renderTodos();
 }
 
@@ -43,13 +68,18 @@ function addTodo() {
 
     if (text === '') return;
 
+    const dueDate = document.getElementById('todoDueDate').value || null;
+
     todos.push({
         id: nextId++,
         text: text,
-        completed: false
+        completed: false,
+        dueDate: dueDate
     });
 
     input.value = '';
+    document.getElementById('todoDueDate').value = '';
+    saveTodos();
     renderTodos();
 }
 
@@ -57,12 +87,14 @@ function toggleTodo(id) {
     const todo = todos.find(t => t.id === id);
     if (todo) {
         todo.completed = !todo.completed;
+        saveTodos();
         renderTodos();
     }
 }
 
 function deleteTodo(id) {
     todos = todos.filter(t => t.id !== id);
+    saveTodos();
     renderTodos();
 }
 
@@ -84,6 +116,16 @@ function renderTodos() {
             <button class="todo-delete">Delete</button>
         `;
 
+        if (todo.dueDate) {
+            const dueDateEl = document.createElement('span');
+            dueDateEl.className = 'todo-due-date';
+            if (isPast(parseISO(todo.dueDate)) && !isToday(parseISO(todo.dueDate))) {
+                dueDateEl.classList.add('overdue');
+            }
+            dueDateEl.textContent = formatDueDate(todo.dueDate);
+            li.insertBefore(dueDateEl, li.querySelector('.todo-delete'));
+        }
+
         li.querySelector('.todo-checkbox').addEventListener('change', () => toggleTodo(todo.id));
         li.querySelector('.todo-delete').addEventListener('click', () => deleteTodo(todo.id));
 
@@ -93,12 +135,35 @@ function renderTodos() {
 
 // Feature 2: Filter todos based on current filter
 function getFilteredTodos() {
+    let filtered;
     if (currentFilter === 'active') {
-        return todos.filter(t => !t.completed);
+        filtered = todos.filter(t => !t.completed);
     } else if (currentFilter === 'completed') {
-        return todos.filter(t => t.completed);
+        filtered = todos.filter(t => t.completed);
+    } else {
+        filtered = [...todos];
     }
-    return todos; // 'all'
+
+    if (sortByDueDateActive) {
+        filtered.sort((a, b) => {
+            if (!a.dueDate && !b.dueDate) return 0;
+            if (!a.dueDate) return 1;
+            if (!b.dueDate) return -1;
+            return a.dueDate.localeCompare(b.dueDate);
+        });
+    }
+
+    return filtered;
+}
+
+// Feature 3: Format due date for display
+function formatDueDate(dateStr) {
+    const date = parseISO(dateStr);
+    if (!isValid(date)) return null;
+    if (isToday(date)) return "Due today";
+    if (isTomorrow(date)) return "Due tomorrow";
+    if (isPast(date)) return `Overdue · ${format(date, "MMM d")}`;
+    return `Due ${format(date, "MMM d, yyyy")}`;
 }
 
 // Feature 2: Set filter and update UI

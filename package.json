@@ -9,9 +9,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "npm run lint:js && npm run lint:css",
-    "lint:js": "eslint app.js",
+    "lint:js": "eslint main.js",
     "lint:css": "stylelint styles.css",
-    "lint:fix": "eslint app.js --fix && stylelint styles.css --fix"
+    "lint:fix": "eslint main.js --fix && stylelint styles.css --fix"
   },
   "keywords": [
     "todo",

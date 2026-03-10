@@ -1,5 +1,5 @@
 import { VibeKanbanWebCompanion } from 'vibe-kanban-web-companion';
-import { format, parseISO, isValid, isPast, isToday, isTomorrow } from "date-fns";
+import { format, parseISO, isValid, isPast, isToday, isTomorrow } from 'date-fns';
 
 // Todos array (Feature 1)
 let todos = [];
@@ -7,6 +7,10 @@ let nextId = 1;
 
 // Feature 3: Sort by due date
 let sortByDueDateActive = false;
+
+// Feature 5: Priority system
+const PRIORITY_ORDER = { high: 1, medium: 2, low: 3 };
+let sortByPriorityActive = false;
 
 function saveTodos() {
     localStorage.setItem('todos', JSON.stringify(todos));
@@ -17,6 +21,7 @@ function loadTodos() {
     const stored = localStorage.getItem('todos');
     if (stored) {
         todos = JSON.parse(stored);
+        todos = todos.map(t => ({ priority: 'medium', ...t }));
         nextId = Number(localStorage.getItem('nextId')) || todos.length + 1;
     }
 }
@@ -45,10 +50,24 @@ function init() {
         btn.addEventListener('click', () => setFilter(btn.dataset.filter));
     });
 
-    // Wire up sort button
+    // Wire up sort buttons (Feature 3 + Feature 5 — mutually exclusive)
     document.getElementById('sortByDueDate').addEventListener('click', () => {
         sortByDueDateActive = !sortByDueDateActive;
         document.getElementById('sortByDueDate').classList.toggle('active', sortByDueDateActive);
+        if (sortByDueDateActive) {
+            sortByPriorityActive = false;
+            document.getElementById('sortByPriority').classList.remove('active');
+        }
+        renderTodos();
+    });
+
+    document.getElementById('sortByPriority').addEventListener('click', () => {
+        sortByPriorityActive = !sortByPriorityActive;
+        document.getElementById('sortByPriority').classList.toggle('active', sortByPriorityActive);
+        if (sortByPriorityActive) {
+            sortByDueDateActive = false;
+            document.getElementById('sortByDueDate').classList.remove('active');
+        }
         renderTodos();
     });
 
@@ -100,16 +119,19 @@ function addTodo() {
     if (text === '') return;
 
     const dueDate = document.getElementById('todoDueDate').value || null;
+    const priority = document.getElementById('todoPriority').value;
 
     todos.push({
         id: nextId++,
         text: text,
         completed: false,
-        dueDate: dueDate
+        dueDate: dueDate,
+        priority: priority
     });
 
     input.value = '';
     document.getElementById('todoDueDate').value = '';
+    document.getElementById('todoPriority').value = 'medium';
     saveTodos();
     renderTodos();
 }
@@ -142,9 +164,9 @@ function renderTodos() {
         if (todo.completed) li.classList.add('completed');
 
         li.dataset.id = todo.id;
-        li.draggable = !sortByDueDateActive;
+        li.draggable = !sortByDueDateActive && !sortByPriorityActive;
 
-        if (!sortByDueDateActive) {
+        if (!sortByDueDateActive && !sortByPriorityActive) {
             li.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('text/plain', String(todo.id));
                 li.classList.add('dragging');
@@ -180,6 +202,23 @@ function renderTodos() {
             <span class="todo-text">${escapeHtml(todo.text)}</span>
             <button class="todo-delete">Delete</button>
         `;
+
+        const level = todo.priority ?? 'medium';
+        const priorityEl = document.createElement('select');
+        priorityEl.className = `priority-badge priority-select priority-${level}`;
+        ['high', 'medium', 'low'].forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p;
+            opt.textContent = p.charAt(0).toUpperCase() + p.slice(1);
+            opt.selected = p === level;
+            priorityEl.appendChild(opt);
+        });
+        priorityEl.addEventListener('change', () => {
+            todo.priority = priorityEl.value;
+            saveTodos();
+            renderTodos();
+        });
+        li.insertBefore(priorityEl, li.querySelector('.todo-delete'));
 
         if (todo.dueDate) {
             const dueDateEl = document.createElement('span');
@@ -218,6 +257,12 @@ function getFilteredTodos() {
         });
     }
 
+    if (sortByPriorityActive) {
+        filtered.sort((a, b) =>
+            PRIORITY_ORDER[a.priority ?? 'medium'] - PRIORITY_ORDER[b.priority ?? 'medium']
+        );
+    }
+
     return filtered;
 }
 
@@ -225,10 +270,10 @@ function getFilteredTodos() {
 function formatDueDate(dateStr) {
     const date = parseISO(dateStr);
     if (!isValid(date)) return null;
-    if (isToday(date)) return "Due today";
-    if (isTomorrow(date)) return "Due tomorrow";
-    if (isPast(date)) return `Overdue · ${format(date, "MMM d")}`;
-    return `Due ${format(date, "MMM d, yyyy")}`;
+    if (isToday(date)) return 'Due today';
+    if (isTomorrow(date)) return 'Due tomorrow';
+    if (isPast(date)) return `Overdue · ${format(date, 'MMM d')}`;
+    return `Due ${format(date, 'MMM d, yyyy')}`;
 }
 
 // Feature 2: Set filter and update UI
@@ -275,7 +320,7 @@ function importTodos(file) {
                 alert('Invalid todos file format.');
                 return;
             }
-            todos = data;
+            todos = data.map(t => ({ priority: 'medium', ...t }));
             nextId = todos.length > 0 ? Math.max(...todos.map(t => t.id)) + 1 : 1;
             saveTodos();
             renderTodos();

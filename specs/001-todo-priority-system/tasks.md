@@ -19,7 +19,7 @@
 
 **Purpose**: Confirm the existing application runs cleanly before any changes.
 
-- [ ] T001 Start dev server with `npm run dev` and manually verify existing features (add/toggle/delete todos, filter, due-date sort, dark mode, drag-drop, export/import) all work correctly in `index.html` / `main.js` / `styles.css`
+- [x] T001 Start dev server with `npm run dev` and manually verify existing features (add/toggle/delete todos, filter, due-date sort, dark mode, drag-drop, export/import) all work correctly in `index.html` / `main.js` / `styles.css`
 
 ---
 
@@ -29,9 +29,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 Add `const PRIORITY_ORDER = { high: 1, medium: 2, low: 3 };` constant at the top of `main.js` (after existing state variables)
-- [ ] T003 [P] Update `importTodos()` in `main.js` to apply `priority: t.priority ?? "medium"` when mapping imported todos (preserves backward compatibility with JSON files that lack a priority field)
-- [ ] T004 [P] Update `loadTodos()` in `main.js` to apply `todos = todos.map(t => ({ priority: "medium", ...t }))` after parsing stored JSON (ensures existing localStorage data without a priority field receives the default)
+- [x] T002 Add `const PRIORITY_ORDER = { high: 1, medium: 2, low: 3 };` constant at the top of `main.js` (after existing state variables)
+- [x] T003 [P] Update `importTodos()` in `main.js` to apply `priority: t.priority ?? "medium"` when mapping imported todos (preserves backward compatibility with JSON files that lack a priority field)
+- [x] T004 [P] Update `loadTodos()` in `main.js` to apply `todos = todos.map(t => ({ priority: "medium", ...t }))` after parsing stored JSON (ensures existing localStorage data without a priority field receives the default)
 
 **Checkpoint**: All todos — stored, imported, or newly created — now have a `priority` field.
 
@@ -45,9 +45,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Add a `<select id="todoPriority">` element with options High / Medium / Low (Medium pre-selected) to the add-todo form in `index.html`, alongside the existing `#todoInput` and `#todoDueDate` inputs
-- [ ] T006 [US1] Update `addTodo()` in `main.js` to read `document.getElementById("todoPriority").value` and include `priority` in the new todo object pushed to `todos`
-- [ ] T007 [US1] Reset `#todoPriority` back to `"medium"` in `addTodo()` in `main.js` after a todo is successfully added (alongside the existing input/dueDate resets)
+- [x] T005 [US1] Add a `<select id="todoPriority">` element with options High / Medium / Low (Medium pre-selected) to the add-todo form in `index.html`, alongside the existing `#todoInput` and `#todoDueDate` inputs
+- [x] T006 [US1] Update `addTodo()` in `main.js` to read `document.getElementById("todoPriority").value` and include `priority` in the new todo object pushed to `todos`
+- [x] T007 [US1] Reset `#todoPriority` back to `"medium"` in `addTodo()` in `main.js` after a todo is successfully added (alongside the existing input/dueDate resets)
 
 **Checkpoint**: User Story 1 is fully functional. Create todos with all three priorities, refresh — all priorities persist correctly.
 
@@ -61,9 +61,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [P] [US2] Add `.priority-badge` base styles (including `appearance: none; -webkit-appearance: none;` so background-color renders correctly when applied to a `<select>` in US4) and `.priority-high` / `.priority-medium` / `.priority-low` colour variants (light mode) to `styles.css` — use distinct background colours (e.g., red-family / amber-family / teal-family) with contrasting text
-- [ ] T009 [P] [US2] Add dark-mode overrides for all three `.priority-*` variants inside the existing `[data-theme="dark"]` selector block in `styles.css` (depends on T008 defining the base classes, but touches only the dark-mode block — safe to run in parallel)
-- [ ] T010 [US2] In `renderTodos()` in `main.js`, create a `<span class="priority-badge priority-${todo.priority ?? 'medium'}">` element with capitalised label text (e.g., "High") and insert it into each `<li>` before the delete button (mirrors the existing `todo-due-date` span insertion pattern)
+- [x] T008 [P] [US2] Add `.priority-badge` base styles (including `appearance: none; -webkit-appearance: none;` so background-color renders correctly when applied to a `<select>` in US4) and `.priority-high` / `.priority-medium` / `.priority-low` colour variants (light mode) to `styles.css` — use distinct background colours (e.g., red-family / amber-family / teal-family) with contrasting text
+- [x] T009 [P] [US2] Add dark-mode overrides for all three `.priority-*` variants inside the existing `[data-theme="dark"]` selector block in `styles.css` (depends on T008 defining the base classes, but touches only the dark-mode block — safe to run in parallel)
+- [x] T010 [US2] In `renderTodos()` in `main.js`, create a `<span class="priority-badge priority-${todo.priority ?? 'medium'}">` element with capitalised label text (e.g., "High") and insert it into each `<li>` before the delete button (mirrors the existing `todo-due-date` span insertion pattern)
 
 **Checkpoint**: User Story 2 functional. All three badge variants visible and distinguishable in both themes.
 
@@ -77,11 +77,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T011 [US3] Add `let sortByPriorityActive = false;` state variable in `main.js` alongside the existing `sortByDueDateActive` variable
-- [ ] T012 [US3] Add a `<button id="sortByPriority">Sort by Priority</button>` button to the controls section of `index.html` (alongside the existing `#sortByDueDate` button)
-- [ ] T013 [US3] In `init()` in `main.js`, wire up a click handler for `#sortByPriority` that: (1) toggles `sortByPriorityActive`, (2) if activating, sets `sortByDueDateActive = false` and removes `active` class from `#sortByDueDate`, (3) toggles `active` class on `#sortByPriority`, (4) calls `renderTodos()`
-- [ ] T013b [US3] Update the existing `#sortByDueDate` click handler in `init()` in `main.js` to reset `sortByPriorityActive = false` and remove the `active` class from `#sortByPriority` when due-date sort is activated (makes mutual exclusivity work in both directions per FR-007)
-- [ ] T014 [US3] Add a priority sort branch to `getFilteredTodos()` in `main.js`: when `sortByPriorityActive` is true, sort `filtered` by `PRIORITY_ORDER[a.priority ?? "medium"] - PRIORITY_ORDER[b.priority ?? "medium"]` (stable — JavaScript sort is stable in ES2019+); requires T002 (PRIORITY_ORDER constant)
+- [x] T011 [US3] Add `let sortByPriorityActive = false;` state variable in `main.js` alongside the existing `sortByDueDateActive` variable
+- [x] T012 [US3] Add a `<button id="sortByPriority">Sort by Priority</button>` button to the controls section of `index.html` (alongside the existing `#sortByDueDate` button)
+- [x] T013 [US3] In `init()` in `main.js`, wire up a click handler for `#sortByPriority` that: (1) toggles `sortByPriorityActive`, (2) if activating, sets `sortByDueDateActive = false` and removes `active` class from `#sortByDueDate`, (3) toggles `active` class on `#sortByPriority`, (4) calls `renderTodos()`
+- [x] T013b [US3] Update the existing `#sortByDueDate` click handler in `init()` in `main.js` to reset `sortByPriorityActive = false` and remove the `active` class from `#sortByPriority` when due-date sort is activated (makes mutual exclusivity work in both directions per FR-007)
+- [x] T014 [US3] Add a priority sort branch to `getFilteredTodos()` in `main.js`: when `sortByPriorityActive` is true, sort `filtered` by `PRIORITY_ORDER[a.priority ?? "medium"] - PRIORITY_ORDER[b.priority ?? "medium"]` (stable — JavaScript sort is stable in ES2019+); requires T002 (PRIORITY_ORDER constant)
 
 **Checkpoint**: User Story 3 functional. Priority sort and due-date sort are mutually exclusive; deactivating restores manual order.
 
@@ -95,8 +95,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T015 [US4] In `renderTodos()` in `main.js`, replace the static `.priority-badge` span (created in T010) with an inline `<select class="priority-select priority-badge priority-${todo.priority ?? 'medium'}">` element containing the same High/Medium/Low options, with `todo.priority ?? "medium"` pre-selected — relies on `appearance: none` added in T009 to ensure colour classes render on the `<select>`
-- [ ] T016 [US4] Wire up a `change` event handler on the inline `<select>` in `renderTodos()` in `main.js` that updates `todo.priority` to the new value and calls `saveTodos()` then `renderTodos()`
+- [x] T015 [US4] In `renderTodos()` in `main.js`, replace the static `.priority-badge` span (created in T010) with an inline `<select class="priority-select priority-badge priority-${todo.priority ?? 'medium'}">` element containing the same High/Medium/Low options, with `todo.priority ?? "medium"` pre-selected — relies on `appearance: none` added in T009 to ensure colour classes render on the `<select>`
+- [x] T016 [US4] Wire up a `change` event handler on the inline `<select>` in `renderTodos()` in `main.js` that updates `todo.priority` to the new value and calls `saveTodos()` then `renderTodos()`
 
 **Checkpoint**: User Story 4 functional. All four user stories are independently functional.
 
@@ -106,7 +106,7 @@
 
 **Purpose**: Lint compliance, dark-mode QA, and full manual validation.
 
-- [ ] T017 [P] Run `npm run lint` and fix any ESLint errors in `main.js` (double quotes, semicolons, no unused vars) and any Stylelint errors in `styles.css`
+- [x] T017 [P] Run `npm run lint` and fix any ESLint errors in `main.js` (double quotes, semicolons, no unused vars) and any Stylelint errors in `styles.css`
 - [ ] T018 Execute all manual test scenarios from `specs/001-todo-priority-system/quickstart.md` — verify every acceptance criterion from all four user stories passes
 
 ---

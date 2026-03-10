@@ -258,8 +258,9 @@ function getFilteredTodos() {
     }
 
     if (sortByPriorityActive) {
+    if (sortByPriorityActive) {
         filtered.sort((a, b) =>
-            PRIORITY_ORDER[a.priority ?? 'medium'] - PRIORITY_ORDER[b.priority ?? 'medium']
+            (PRIORITY_ORDER[a.priority] ?? PRIORITY_ORDER['medium']) - (PRIORITY_ORDER[b.priority] ?? PRIORITY_ORDER['medium'])
         );
     }
 

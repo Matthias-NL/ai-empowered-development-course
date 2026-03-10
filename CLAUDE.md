@@ -45,3 +45,10 @@ Nine progressive modules in `Course Material/` build on the TODO app:
 7. QA and pull requests
 8. Language Server Protocol
 9. Transforming/structuring data
+
+## Active Technologies
+- Vanilla JavaScript (ES Modules), HTML5, CSS3 + date-fns (already installed — date utilities), Vite (dev server / build) (001-todo-priority-system)
+- Browser `localStorage` — existing persistence pattern (001-todo-priority-system)
+
+## Recent Changes
+- 001-todo-priority-system: Added Vanilla JavaScript (ES Modules), HTML5, CSS3 + date-fns (already installed — date utilities), Vite (dev server / build)

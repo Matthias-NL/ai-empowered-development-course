@@ -215,7 +215,7 @@ function renderTodos() {
 
         const level = todo.priority ?? 'medium';
         const priorityEl = document.createElement('select');
-        priorityEl.className = `priority-badge priority-select priority-${level}`;
+        priorityEl.className = `priority-badge priority-${level}`;
         ['high', 'medium', 'low'].forEach(p => {
             const opt = document.createElement('option');
             opt.value = p;
@@ -240,12 +240,12 @@ function renderTodos() {
             li.insertBefore(dueDateEl, li.querySelector('.todo-delete'));
         }
 
-        const starBtn = document.createElement("button");
-        starBtn.className = "todo-star" + (todo.favorite ? " active" : "");
-        starBtn.setAttribute("aria-label", todo.favorite ? "Unfavorite" : "Favorite");
-        starBtn.textContent = "★";
-        starBtn.addEventListener("click", () => toggleFavorite(todo.id));
-        li.insertBefore(starBtn, li.querySelector(".todo-checkbox"));
+        const starBtn = document.createElement('button');
+        starBtn.className = 'todo-star' + (todo.favorite ? ' active' : '');
+        starBtn.setAttribute('aria-label', todo.favorite ? 'Unfavorite' : 'Favorite');
+        starBtn.textContent = '★';
+        starBtn.addEventListener('click', () => toggleFavorite(todo.id));
+        li.insertBefore(starBtn, li.querySelector('.todo-checkbox'));
 
         li.querySelector('.todo-checkbox').addEventListener('change', () => toggleTodo(todo.id));
         li.querySelector('.todo-delete').addEventListener('click', () => deleteTodo(todo.id));
@@ -276,7 +276,7 @@ function getFilteredTodos() {
 
     if (sortByPriorityActive) {
         filtered.sort((a, b) =>
-            PRIORITY_ORDER[a.priority ?? 'medium'] - PRIORITY_ORDER[b.priority ?? 'medium']
+            (PRIORITY_ORDER[a.priority] ?? PRIORITY_ORDER['medium']) - (PRIORITY_ORDER[b.priority] ?? PRIORITY_ORDER['medium'])
         );
     }
 

@@ -242,8 +242,8 @@ function renderTodos() {
 
         const starBtn = document.createElement("button");
         starBtn.className = "todo-star" + (todo.favorite ? " active" : "");
-        starBtn.setAttribute("aria-label", todo.favorite ? "Unfavorite" : "Favorite");
-        starBtn.textContent = "★";
+        starBtn.setAttribute("aria-label", "Favorite");
+        starBtn.setAttribute("aria-pressed", todo.favorite ? "true" : "false");
         starBtn.addEventListener("click", () => toggleFavorite(todo.id));
         li.insertBefore(starBtn, li.querySelector(".todo-checkbox"));
 

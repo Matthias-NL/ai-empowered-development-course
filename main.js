@@ -205,7 +205,7 @@ function renderTodos() {
 
         const level = todo.priority ?? 'medium';
         const priorityEl = document.createElement('select');
-        priorityEl.className = `priority-badge priority-select priority-${level}`;
+        priorityEl.className = `priority-badge priority-${level}`;
         ['high', 'medium', 'low'].forEach(p => {
             const opt = document.createElement('option');
             opt.value = p;

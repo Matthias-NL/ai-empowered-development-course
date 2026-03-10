@@ -206,9 +206,16 @@ footer {
     transition: color 0.15s;
 }
 
-.todo-star:hover,
+.todo-star:hover {
+    color: #f59e0b;
+}
+
 .todo-star.active {
     color: #f59e0b;
+}
+
+.todo-star.active:hover {
+    color: #d97706;
 }
 
 .todo-delete {

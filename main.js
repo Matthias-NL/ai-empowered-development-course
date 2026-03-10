@@ -21,7 +21,7 @@ function loadTodos() {
     const stored = localStorage.getItem('todos');
     if (stored) {
         todos = JSON.parse(stored);
-        todos = todos.map(t => ({ priority: 'medium', ...t }));
+        todos = todos.map(t => ({ priority: 'medium', favorite: false, ...t }));
         nextId = Number(localStorage.getItem('nextId')) || todos.length + 1;
     }
 }
@@ -126,7 +126,8 @@ function addTodo() {
         text: text,
         completed: false,
         dueDate: dueDate,
-        priority: priority
+        priority: priority,
+        favorite: false
     });
 
     input.value = '';
@@ -140,6 +141,15 @@ function toggleTodo(id) {
     const todo = todos.find(t => t.id === id);
     if (todo) {
         todo.completed = !todo.completed;
+        saveTodos();
+        renderTodos();
+    }
+}
+
+function toggleFavorite(id) {
+    const todo = todos.find(t => t.id === id);
+    if (todo) {
+        todo.favorite = !todo.favorite;
         saveTodos();
         renderTodos();
     }
@@ -229,6 +239,13 @@ function renderTodos() {
             dueDateEl.textContent = formatDueDate(todo.dueDate);
             li.insertBefore(dueDateEl, li.querySelector('.todo-delete'));
         }
+
+        const starBtn = document.createElement("button");
+        starBtn.className = "todo-star" + (todo.favorite ? " active" : "");
+        starBtn.setAttribute("aria-label", todo.favorite ? "Unfavorite" : "Favorite");
+        starBtn.textContent = "★";
+        starBtn.addEventListener("click", () => toggleFavorite(todo.id));
+        li.insertBefore(starBtn, li.querySelector(".todo-checkbox"));
 
         li.querySelector('.todo-checkbox').addEventListener('change', () => toggleTodo(todo.id));
         li.querySelector('.todo-delete').addEventListener('click', () => deleteTodo(todo.id));
@@ -320,7 +337,7 @@ function importTodos(file) {
                 alert('Invalid todos file format.');
                 return;
             }
-            todos = data.map(t => ({ priority: 'medium', ...t }));
+            todos = data.map(t => ({ priority: 'medium', favorite: false, ...t }));
             nextId = todos.length > 0 ? Math.max(...todos.map(t => t.id)) + 1 : 1;
             saveTodos();
             renderTodos();
